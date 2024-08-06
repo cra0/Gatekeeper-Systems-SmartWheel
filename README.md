@@ -35,7 +35,7 @@ Unlock2 Code: 1111000 (Hexadecimal: 0x78)
 
 Older Gatekeeper System wheels also have their own lock signal that isn't in the form of the typical packet shown above. Instead its a constant stream of blips like so:
 
-![signal_old](docs/images/signal_old_lock.PNG)
+![signal_old](docs/images/signal_old_lock.png)
 
 ### Device Information Query
 
