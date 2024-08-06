@@ -2,7 +2,7 @@
 
 ## About
 
-This repository houses the results from an initial reverse engineering effort focused on the smart wheel used by various supermarkets. This is purely for research and education on how embedded devices work.
+This repository houses the results from an initial reverse engineering effort focused on the smart wheel used by various supermarkets. This is purely for research and education on how embedded devices work. I have intensionally not included any firmware dumps in this repo to avoid issues with copyright.
 
 ![signal](docs/images/smart-wheel.png)
 
@@ -108,7 +108,7 @@ These are yet to be explored further but there are transceivers that I have conf
 
 ### chip-cc2510-F32
 
-This contains memory dumps of the firmware from CC2510 chips.
+The newer smart wheels use a TI CC2510 chip.
 
 <img src="research/chip-cc2510-F32/soc-photos/SOC_RevJ.jpg" width="200" alt="SOC-RevJ">
 <img src="research/chip-cc2510-F32/soc-photos/SOC_RevK.jpg" width="200" alt="SOC-RevK">
@@ -116,7 +116,6 @@ This contains memory dumps of the firmware from CC2510 chips.
 Here is the pinout illustrated:
 <img src="research/chip-cc2510-F32/soc-photos/PINOUT_CC2510.jpg" width="405" alt="SOC-PINS">
 
-Each revision folder also contains a radio register dump html with values taken live from the chips.
 
 RevN Unfortunately has a DEBUG_READ lock and possibly I will need to follow something [similar to this blog post](https://zeus.ugent.be/blog/22-23/reverse_engineering_epaper/) to get it's memory dumped out.
 
@@ -132,3 +131,4 @@ If you wish to help contribute or discuss anything feel free to get in touch.
 2. [Denial of Shopping - Exploiting Shopping Cart Immobilization Systems, DEF CON 29 Presentation](https://infocon.org/cons/DEF%20CON/DEF%20CON%2029/DEF%20CON%2029%20presentations/Joseph%20Gabay%20-%20Dos-%20Denial%20of%20Shopping%20%E2%80%93%20Analyzing%20and%20Exploiting%20(Physical)%20Shopping%20Cart%20Immobilization%20Systems.pdf)
 3. [Consumer B-Gone](https://www.tmplab.org/2008/06/18/consumer-b-gone/)
 4. [How GateKeeper Systems Work (Archived)](https://web.archive.org/web/20170504023929/http://www.gatekeepersystems.com/sol_cc_cc_how_it_works.php)
+5. [Gatekeeper Systems (HK) Ltd. FCC Wireless Applications](https://fccid.io/W3Z)
