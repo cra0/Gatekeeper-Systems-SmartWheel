@@ -106,6 +106,12 @@ These are yet to be explored further but there are transceivers that I have conf
 
 ## SOC (MCU)
 
+### ATMEL MEGA
+
+Older builds would use `ATMEL MEGA 168PA`
+
+![mcu-mega168pa](docs/images/oldmcu.png)
+
 ### chip-cc2510-F32
 
 The newer smart wheels use a TI CC2510 chip.
@@ -115,6 +121,11 @@ The newer smart wheels use a TI CC2510 chip.
 
 Here is the pinout illustrated:
 <img src="research/chip-cc2510-F32/soc-photos/PINOUT_CC2510.jpg" width="405" alt="SOC-PINS">
+
+Firmware has been successfully extracted using the [TI CC Debugger tool](https://www.ti.com/tool/CC-DEBUGGER)
+I will write a blog post later around this topic.
+
+<img src="docs/images/firmware-analysis.png" width="512" alt="SOC-PINS">
 
 
 RevN Unfortunately has a DEBUG_READ lock and possibly I will need to follow something [similar to this blog post](https://zeus.ugent.be/blog/22-23/reverse_engineering_epaper/) to get it's memory dumped out.
