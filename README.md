@@ -134,7 +134,7 @@ RevN Unfortunately has a DEBUG_READ lock and possibly I will need to follow some
 
 As it stands, the repository's contents are foundational. The goal moving forward is to uncover additional embedded functionalities within the firmware that extend beyond basic [replay attack](https://en.wikipedia.org/wiki/Replay_attack).
 
-If you wish to help contribute or discuss anything feel free to get in touch.
+If you wish to help contribute or discuss anything feel free to get in touch via email or join our [discord group](https://discord.gg/cVwmnhJgt3).
 
 ## References
 
