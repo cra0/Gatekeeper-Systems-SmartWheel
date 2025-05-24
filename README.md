@@ -64,10 +64,11 @@ In the current implementation devices such as the indoor/door manager have termi
 related operations.
 
 So far the ones I've discovered are through brute force of the DIP switch are:
-`
+
+```c
 0x34, // Permission (1min) (binary 00110100, decimal: 52)
 0x3A, // Permission (2min) (binary 00111010, decimal: 58)
-`
+```
 
 These give the smart wheel permission not to lock if it was to encounter a lock command such as 0xC7 (Lock2).
 
