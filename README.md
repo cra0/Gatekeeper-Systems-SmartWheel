@@ -58,6 +58,19 @@ Once the wheel receives this it will then return back statistical information in
 
 This data can also be sent from the wheel via the 2.4GHz signal.
 
+### Permission Signal
+
+In the current implementation devices such as the indoor/door manager have terminals to run a loop wire for permission
+related operations.
+
+So far the ones I've discovered are through brute force of the DIP switch are:
+`
+0x34, // Permission (1min) (binary 00110100, decimal: 52)
+0x3A, // Permission (2min) (binary 00111010, decimal: 58)
+`
+
+These give the smart wheel permission not to lock if it was to encounter a lock command such as 0xC7 (Lock2).
+
 ## (2.4GHz Operation)
 
 The smart wheels also support 2.4GHz functionality. In the past it was mentioned [by Joseph Gabay at DEFCON](https://youtu.be/fBICDODmCPI?t=1540) that the wheel can be unlocked
