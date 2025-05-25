@@ -63,14 +63,16 @@ This data can also be sent from the wheel via the 2.4GHz signal.
 In the current implementation devices such as the indoor/door manager have terminals to run a loop wire for permission
 related operations.
 
-So far the ones I've discovered are through brute force of the DIP switch are:
+So far the ones I've discovered through the brute force of the DIP switch are:
 
 ```c
-0x34, // Permission (1min) (binary 00110100, decimal: 52)
-0x3A, // Permission (2min) (binary 00111010, decimal: 58)
+0x34, // Permission (1min)   (binary 00110100, decimal: 52)
+0x36, // Permission (5min)   (binary 00110110, decimal: 54)
+0x3A, // Permission (2min)   (binary 00111010, decimal: 58)
+0x56, // Permission (30secs) (binary 01010110, decimal: 86)
 ```
 
-These give the smart wheel permission not to lock if it was to encounter a lock command such as 0xC7 (Lock2).
+These give the smart wheel permission not to lock if it was to encounter a lock command such as 0x8E (Lock1) or 0xC7 (Lock2).
 
 ## (2.4GHz Operation)
 
