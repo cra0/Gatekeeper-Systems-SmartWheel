@@ -6,9 +6,7 @@ This repository houses the results from an initial reverse engineering effort fo
 
 ![signal](docs/images/smart-wheel.png)
 
-
 ## (8KHz Operation)
-
 
 ### Unlocking and Locking Mechanism (8khz_unlock_lock)
 
@@ -73,6 +71,8 @@ So far the ones I've discovered through the brute force of the DIP switch are:
 ```
 
 These give the smart wheel permission not to lock if it was to encounter a lock command such as 0x8E (Lock1) or 0xC7 (Lock2).
+
+You can find [tools](tools/README.md) I've developed here that deal with these in more detail.
 
 ## (2.4GHz Operation)
 
