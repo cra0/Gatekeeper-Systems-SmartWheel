@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VLFSignalTool": {
+      "commandName": "Project",
+      "commandLineArgs": "capture.wav"
+    }
+  }
+}
