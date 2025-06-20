@@ -1,8 +1,6 @@
 ﻿using NAudio.Wave;
-using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Reflection.PortableExecutable;
 using System.Runtime.Versioning;
 
 namespace VLFLib;

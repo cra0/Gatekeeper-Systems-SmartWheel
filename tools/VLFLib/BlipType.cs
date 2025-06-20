@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VLFLib;
+﻿namespace VLFLib;
 
 public enum BlipType
 {

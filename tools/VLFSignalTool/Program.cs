@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Runtime.Versioning;
+﻿using System.Runtime.Versioning;
 using VLFLib;
 
 namespace VLFSignalTool

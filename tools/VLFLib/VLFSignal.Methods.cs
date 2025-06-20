@@ -1,9 +1,4 @@
 ﻿using NAudio.Wave;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VLFLib;
 
@@ -124,7 +119,7 @@ public partial class VLFSignal
         return BytesToVLFSignalWavBytes(dataSequence, 44100, 0.8f, 0.555f);
     }
 
-    public static void SaveVLFWavFile(byte[] dataSequence, int sampleRate, string filePath)
+    public static void SaveVLFWavFile(byte[] dataSequence, int sampleRate, float amplitude, float silenceLength, string filePath)
     {
         if (dataSequence == null || dataSequence.Length == 0)
         {
@@ -138,7 +133,7 @@ public partial class VLFSignal
 
         using (WaveFileWriter writer = new WaveFileWriter(filePath, new WaveFormat(sampleRate, 8, 1)))
         {
-            byte[] waveformBytes = BytesToVLFSignalWavBytes(dataSequence, sampleRate, 0.8f, 0.555f);
+            byte[] waveformBytes = BytesToVLFSignalWavBytes(dataSequence, sampleRate, amplitude, silenceLength);
             writer.Write(waveformBytes, 0, waveformBytes.Length);
         }
         return;
