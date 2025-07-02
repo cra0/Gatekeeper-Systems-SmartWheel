@@ -9,7 +9,9 @@
     <Authors>Cra0</Authors>
     <Company>Cra0Digital</Company>
     <Description>Helper library for dealing with VLF signals.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>rf; vlf; gks</PackageTags>
+    
 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/cra0/Gatekeeper-Systems-SmartWheel</RepositoryUrl>
