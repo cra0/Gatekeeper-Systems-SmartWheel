@@ -1,14 +1,12 @@
-﻿using System.Runtime.Versioning;
-using VLFLib;
+﻿using VLFLib;
 
 namespace VLFSignalTool
 {
-    [SupportedOSPlatform("windows")]
     internal class Program
     {
         static int Main(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length < 2 || args.Length > 3)
             {
                 PrintUsage();
                 return 1;
@@ -16,6 +14,7 @@ namespace VLFSignalTool
 
             string mode = args[0].ToLowerInvariant();
             string inputPath = args[1];
+            string? optPath = args.Length == 3 ? args[2] : null;
 
             if (!File.Exists(inputPath))
             {
@@ -85,6 +84,29 @@ namespace VLFSignalTool
                 }
 
                 Console.WriteLine($"Encoded WAV written to {outputPath}");
+            }
+            else if (mode == "-visualize")
+            {
+                string outputPath = optPath ?? Path.ChangeExtension(inputPath, ".png");
+
+                var signal = new VLFSignal();
+                signal.OnSignalConsolePrint += Console.WriteLine;
+                signal.OnSignalError += (_, ex) => Console.Error.WriteLine($"Error: {ex.Message}");
+
+                Console.WriteLine($"Parsing WAV file: {inputPath}");
+                if (!signal.ParseWavSignal(inputPath))
+                {
+                    Console.Error.WriteLine("Failed to parse WAV file. Ensure it is a valid 8-bit mono WAV.");
+                    return 1;
+                }
+
+                if (!signal.RenderWavVisualToFile(outputPath))
+                {
+                    Console.Error.WriteLine("Failed to render waveform image.");
+                    return 1;
+                }
+
+                Console.WriteLine($"Waveform PNG written to {outputPath}");
             }
             else
             {
