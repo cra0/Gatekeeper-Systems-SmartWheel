@@ -4,6 +4,23 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <PackageId>VLFLib</PackageId>
+    <Authors>Cra0</Authors>
+    <Company>Cra0Digital</Company>
+    <Description>Helper library for dealing with VLF signals.</Description>
+    <PackageTags>rf; vlf; gks</PackageTags>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/cra0/Gatekeeper-Systems-SmartWheel</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/cra0/Gatekeeper-Systems-SmartWheel</PackageProjectUrl>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+
+    <Version>0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
