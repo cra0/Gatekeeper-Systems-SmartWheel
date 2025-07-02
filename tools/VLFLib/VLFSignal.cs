@@ -1,11 +1,13 @@
 ﻿using NAudio.Wave;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.Versioning;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+
 
 namespace VLFLib;
 
-[SupportedOSPlatform("windows")]
 public partial class VLFSignal : IVLFSignal
 {
     public event IVLFSignal.VLFEvent? OnSignalParseStarted;
@@ -96,71 +98,58 @@ public partial class VLFSignal : IVLFSignal
     {
         if (_samples.Count == 0)
         {
-            OnSignalError?.Invoke(this, new InvalidOperationException("No samples available to render."));
+            OnSignalError?.Invoke(this,
+                new InvalidOperationException("No samples available to render."));
             return false;
         }
 
-        // Visualization parameters
-        Bitmap bitmap = new Bitmap(imageWidth, imageHeight);
-        Graphics g = Graphics.FromImage(bitmap);
-        g.Clear(Color.White);
+        using Image<Rgba32> img = new(imageWidth, imageHeight, Color.White);
 
-        // Plot waveform
-        float midHeight = imageHeight / 2f;
-        float scaleX = imageWidth / (float)_samples.Count;
-        float scaleY = imageHeight / 256f;
-        Pen pen = new Pen(Color.Blue, 1);
+        float midY = imageHeight / 2f;
+        float sx = imageWidth / (float)_samples.Count;
+        float sy = imageHeight / 256f;
 
-        for (int i = 1; i < _samples.Count; i++)
+        var pts = new PointF[_samples.Count];
+        for (int i = 0; i < _samples.Count; i++)
+            pts[i] = new PointF(i * sx, midY - _samples[i] * sy);
+
+        img.Mutate(ctx => ctx.DrawLine(Color.Blue, 1f, pts));
+
+        var font = Utilities.ResolveFont("Arial", 12);
+        var red = Pens.Solid(Color.Red, 1f);
+        var green = Pens.Solid(Color.Green, 1f);
+        var purple = Pens.Solid(Color.Purple, 1f);
+
+        for (int i = 0; i < _startMarkers.Count && i < _endMarkers.Count; i++)
         {
-            float x1 = (i - 1) * scaleX;
-            float y1 = midHeight - _samples[i - 1] * scaleY;
-            float x2 = i * scaleX;
-            float y2 = midHeight - _samples[i] * scaleY;
-            g.DrawLine(pen, x1, y1, x2, y2);
-        }
+            float x1 = _startMarkers[i] * sx;
+            float x2 = _endMarkers[i] * sx;
 
-        // Draw start and end markers
-        if (_startMarkers.Count > 0 && _endMarkers.Count > 0)
-        {
-            for (int i = 0; i < _startMarkers.Count && i < _endMarkers.Count; i++)
+            img.Mutate(ctx =>
             {
-                // Draw start marker
-                float startX = _startMarkers[i] * scaleX;
-                g.DrawLine(Pens.Red, startX, 0, startX, imageHeight);
+                ctx.DrawLine(red, new PointF(x1, 0), new PointF(x1, imageHeight));
+                ctx.DrawLine(green, new PointF(x2, 0), new PointF(x2, imageHeight));
+                ctx.DrawLine(purple, new PointF(x1, midY), new PointF(x2, midY));
+            });
 
-                // Draw end marker
-                float endX = _endMarkers[i] * scaleX;
-                g.DrawLine(Pens.Green, endX, 0, endX, imageHeight);
+            int len = _endMarkers[i] - _startMarkers[i];
+            var type = DetermineBlipType(len);
 
-                g.DrawLine(Pens.Purple, startX, (imageHeight / 2), endX, (imageHeight / 2));
+            if (type is BlipType.BINARY_ONE or BlipType.BINARY_ZERO)
+            {
+                string digit = type == BlipType.BINARY_ONE ? "1" : "0";
+                float tx = x1 + (x2 - x1) / 2 - 5;
+                float ty = midY + 2;
 
-                // Draw 1 or 0
-                int blipLength = _endMarkers[i] - _startMarkers[i];
-                var blipType = DetermineBlipType(blipLength);
-
-                Font font = new Font("Arial", 12);
-                Brush brush = Brushes.Black;
-
-                if (blipType == BlipType.BINARY_ONE)
-                    g.DrawString("1", font, brush, startX + ((endX - startX) / 2) - 5, (imageHeight / 2) + 2);
-                else if (blipType == BlipType.BINARY_ZERO)
-                    g.DrawString("0", font, brush, startX + ((endX - startX) / 2) - 5, (imageHeight / 2) + 2);
-
-                ConsolePrint("High amplitude segment detected. StartMarker: {0}, EndMarker: {1}, Segment length: {2}", 
-                    _startMarkers[i], _endMarkers[i], blipLength);
+                img.Mutate(ctx => ctx.DrawText(digit, font, Color.Black, new PointF(tx, ty)));
             }
-        }
-        else
-        {
-            ConsolePrint("No valid high amplitude segments detected!");
+
+            ConsolePrint("High amplitude segment detected. StartMarker: {0}, EndMarker: {1}, Segment length: {2}",
+                         _startMarkers[i], _endMarkers[i], len);
         }
 
-        // Save the image
-        if (File.Exists(filePath))
-            File.Delete(filePath);
-        
-        bitmap.Save(filePath, ImageFormat.Png);
+        filePath = Utilities.NormalizeOutputPath(filePath);
+        img.SaveAsPng(filePath);
         ConsolePrint("Waveform visualization saved to {0}", filePath);
         return true;
     }
