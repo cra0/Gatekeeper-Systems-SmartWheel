@@ -1,0 +1,58 @@
+name: Publish VLFLib to NuGet.org
+
+on:
+  push:
+    branches: [ main ]          # adjust if your default branch is different
+    paths:
+      - 'tools/VLFLib/**'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      BASE_VERSION: 0.1               # your major.minor track
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    # --------- create a unique SemVer like 0.1.20250702.3 ------------
+    - name: Compute version
+      id: ver
+      run: |
+        DATE=$(date -u +'%Y%m%d')
+        RUN=${{ github.run_number }}
+        echo "VERSION=${BASE_VERSION}.${DATE}.${RUN}" >> "$GITHUB_ENV"
+
+    # --------- restore, build, pack -----------------------------------
+    - name: Restore
+      working-directory: tools/VLFLib
+      run: dotnet restore
+
+    - name: Build
+      working-directory: tools/VLFLib
+      run: dotnet build -c Release --no-restore
+
+    - name: Pack
+      working-directory: tools/VLFLib
+      run: |
+        dotnet pack -c Release \
+                    -p:PackageVersion=$VERSION \
+                    -o ../../nupkg \
+                    --no-build
+
+    # --------- publish to NuGet.org ----------------------------------
+    - name: Push to NuGet.org
+      run: |
+        dotnet nuget push "./nupkg/*.nupkg" \
+          --api-key  "$NUGET_API_KEY" \
+          --source   "https://api.nuget.org/v3/index.json" \
+          --skip-duplicate \
+          --no-symbols
