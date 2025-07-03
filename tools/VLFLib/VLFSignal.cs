@@ -155,29 +155,61 @@ public partial class VLFSignal : IVLFSignal
     }
 
     /// <summary>
-    /// Writes the collected samples to a specified file.
+    /// Writes the collected samples to a specified stream.
     /// </summary>
-    /// <param name="filePath">The path of the file where the samples will be written. Must be a valid file path.</param>
-    /// <returns><see langword="true"/> if the samples were successfully written to the file; otherwise, <see langword="false"/>
+    /// <param name="outputStream">The stream to write to.</param>
+    /// <returns><see langword="true"/> if the samples were successfully written to the stream; otherwise, <see langword="false"/>
     /// if an error occurred or no samples are available. </returns>
-    public bool DumpSamplesToFile(string filePath)
+    public bool DumpSamplesToStream(Stream outputStream)
     {
         if (_samples.Count == 0)
         {
             OnSignalError?.Invoke(this, new InvalidOperationException("No samples available to dump."));
             return false;
         }
+        if (outputStream == null || !outputStream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
         try
         {
-            using (StreamWriter sw = new StreamWriter(filePath, false))
+            using (var sw = new StreamWriter(outputStream, leaveOpen: true))
             {
                 for (int i = 0; i < _samples.Count; i++)
                 {
-                    sw.WriteLine($"Sample {i}: {_samples[i]}");  // Already centralized around zero
+                    sw.WriteLine($"Sample {i}: {_samples[i]}");
                 }
+                sw.Flush();
             }
-            ConsolePrint("Samples dumped to {0}", filePath);
+            ConsolePrint("Samples dumped to provided stream.");
             return true;
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Dumps the collected samples to a specified file.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public bool DumpSamplesToFile(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("File path is null or empty."));
+            return false;
+        }
+        try
+        {
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                return DumpSamplesToStream(fs);
+            }
         }
         catch (Exception ex)
         {
