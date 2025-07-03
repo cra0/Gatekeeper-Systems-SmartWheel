@@ -18,7 +18,7 @@ public partial class VLFSignal : IVLFSignal
 
     public byte[] Data
     {
-        get { return _vlfdata.ToArray(); }
+        get { return _vlfData.ToArray(); }
     }
 
     private byte[] _buffer;
@@ -27,7 +27,7 @@ public partial class VLFSignal : IVLFSignal
     private List<int> _endMarkers;
 
     private List<BlipType> _blips;
-    private List<byte> _vlfdata;
+    private List<byte> _vlfData;
 
     // Threshold defines
     private const int highThreshold = 42; // Threshold for high amplitude
@@ -51,7 +51,7 @@ public partial class VLFSignal : IVLFSignal
         _startMarkers = new List<int>();
         _endMarkers = new List<int>();
         _blips = new List<BlipType>();
-        _vlfdata = new List<byte>();
+        _vlfData = new List<byte>();
     }
 
     /// <summary>
@@ -96,88 +96,84 @@ public partial class VLFSignal : IVLFSignal
     /// langword="false"/>.</returns>
     public bool RenderWavVisualToFile(string filePath)
     {
-        if (_samples.Count == 0)
+        if (string.IsNullOrWhiteSpace(filePath))
         {
-            OnSignalError?.Invoke(this,
-                new InvalidOperationException("No samples available to render."));
+            OnSignalError?.Invoke(this, new ArgumentException("File path is null or empty."));
             return false;
         }
 
-        using Image<Rgba32> img = new(imageWidth, imageHeight, Color.White);
-
-        float midY = imageHeight / 2f;
-        float sx = imageWidth / (float)_samples.Count;
-        float sy = imageHeight / 256f;
-
-        var pts = new PointF[_samples.Count];
-        for (int i = 0; i < _samples.Count; i++)
-            pts[i] = new PointF(i * sx, midY - _samples[i] * sy);
-
-        img.Mutate(ctx => ctx.DrawLine(Color.Blue, 1f, pts));
-
-        var font = Utilities.ResolveFont("Arial", 12);
-        var red = Pens.Solid(Color.Red, 1f);
-        var green = Pens.Solid(Color.Green, 1f);
-        var purple = Pens.Solid(Color.Purple, 1f);
-
-        for (int i = 0; i < _startMarkers.Count && i < _endMarkers.Count; i++)
+        using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
         {
-            float x1 = _startMarkers[i] * sx;
-            float x2 = _endMarkers[i] * sx;
-
-            img.Mutate(ctx =>
-            {
-                ctx.DrawLine(red, new PointF(x1, 0), new PointF(x1, imageHeight));
-                ctx.DrawLine(green, new PointF(x2, 0), new PointF(x2, imageHeight));
-                ctx.DrawLine(purple, new PointF(x1, midY), new PointF(x2, midY));
-            });
-
-            int len = _endMarkers[i] - _startMarkers[i];
-            var type = DetermineBlipType(len);
-
-            if (type is BlipType.BINARY_ONE or BlipType.BINARY_ZERO)
-            {
-                string digit = type == BlipType.BINARY_ONE ? "1" : "0";
-                float tx = x1 + (x2 - x1) / 2 - 5;
-                float ty = midY + 2;
-
-                img.Mutate(ctx => ctx.DrawText(digit, font, Color.Black, new PointF(tx, ty)));
-            }
-
-            ConsolePrint("High amplitude segment detected. StartMarker: {0}, EndMarker: {1}, Segment length: {2}",
-                         _startMarkers[i], _endMarkers[i], len);
+            return RenderWavVisualToStream(fs);
         }
+    }
 
-        filePath = Utilities.NormalizeOutputPath(filePath);
-        img.SaveAsPng(filePath);
-        ConsolePrint("Waveform visualization saved to {0}", filePath);
-        return true;
+    public bool RenderWavVisualToStream(Stream stream)
+    {
+        if (stream == null || !stream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
+        return InternalRenderWavVisualToStream(stream);
     }
 
     /// <summary>
-    /// Writes the collected samples to a specified file.
+    /// Writes the collected samples to a specified stream.
     /// </summary>
-    /// <param name="filePath">The path of the file where the samples will be written. Must be a valid file path.</param>
-    /// <returns><see langword="true"/> if the samples were successfully written to the file; otherwise, <see langword="false"/>
+    /// <param name="outputStream">The stream to write to.</param>
+    /// <returns><see langword="true"/> if the samples were successfully written to the stream; otherwise, <see langword="false"/>
     /// if an error occurred or no samples are available. </returns>
-    public bool DumpSamplesToFile(string filePath)
+    public bool DumpSamplesToStream(Stream outputStream)
     {
         if (_samples.Count == 0)
         {
             OnSignalError?.Invoke(this, new InvalidOperationException("No samples available to dump."));
             return false;
         }
+        if (outputStream == null || !outputStream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
         try
         {
-            using (StreamWriter sw = new StreamWriter(filePath, false))
+            using (var sw = new StreamWriter(outputStream, leaveOpen: true))
             {
                 for (int i = 0; i < _samples.Count; i++)
                 {
-                    sw.WriteLine($"Sample {i}: {_samples[i]}");  // Already centralized around zero
+                    sw.WriteLine($"Sample {i}: {_samples[i]}");
                 }
+                sw.Flush();
             }
-            ConsolePrint("Samples dumped to {0}", filePath);
+            ConsolePrint("Samples dumped to provided stream.");
             return true;
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Dumps the collected samples to a specified file.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public bool DumpSamplesToFile(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("File path is null or empty."));
+            return false;
+        }
+        try
+        {
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                return DumpSamplesToStream(fs);
+            }
         }
         catch (Exception ex)
         {
@@ -193,7 +189,7 @@ public partial class VLFSignal : IVLFSignal
     /// <returns></returns>
     public bool SaveDataToFile(string filePath)
     {
-        if (_vlfdata.Count == 0)
+        if (_vlfData.Count == 0)
         {
             OnSignalError?.Invoke(this, new InvalidOperationException("No VLF data available to save."));
             return false;
@@ -202,7 +198,7 @@ public partial class VLFSignal : IVLFSignal
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
-                fs.Write(_vlfdata.ToArray(), 0, _vlfdata.Count);
+                fs.Write(_vlfData.ToArray(), 0, _vlfData.Count);
             }
             ConsolePrint("VLF data saved to {0}", filePath);
             return true;
@@ -243,6 +239,69 @@ public partial class VLFSignal : IVLFSignal
         }
     }
 
+    /// <summary>
+    /// Saves the current VLFSignal's Data as a VLF WAV file to a provided stream.
+    /// </summary>
+    /// <param name="outputStream">The stream to write the WAV data to. Must be writable and seekable.</param>
+    /// <param name="sampleRate">Sample rate for the WAV file (default: 44100).</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    public bool ToWavStream(Stream outputStream, int sampleRate = 44100)
+    {
+        if (_buffer == null || _buffer.Length == 0)
+        {
+            OnSignalError?.Invoke(this, new InvalidOperationException("No data available to save as WAV."));
+            return false;
+        }
+        if (outputStream == null || !outputStream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
+        try
+        {
+            using (var wfw = new WaveFileWriter(outputStream, new WaveFormat(sampleRate, 8, 1)))
+            {
+                wfw.Write(_buffer, 0, _buffer.Length);
+            }
+            ConsolePrint("VLF signal written as WAV to provided stream.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Saves the current VLFSignal's Data as a VLF WAV file and returns the WAV as a byte array.
+    /// </summary>
+    /// <param name="sampleRate">Sample rate for the WAV file (default: 44100).</param>
+    /// <returns>WAV file as byte array, or null if failed.</returns>
+    public byte[]? ToWavBytes(int sampleRate = 44100)
+    {
+        if (_buffer == null || _buffer.Length == 0)
+        {
+            OnSignalError?.Invoke(this, new InvalidOperationException("No data available to save as WAV."));
+            return null;
+        }
+        try
+        {
+            using (var ms = new MemoryStream())
+            {
+                if (!ToWavStream(ms, sampleRate))
+                    return null;
+                ConsolePrint("VLF signal exported as WAV byte array.");
+                return ms.ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return null;
+        }
+    }
+
     private void FlushInternalBuffers()
     {
         _buffer = Array.Empty<byte>();
@@ -250,7 +309,7 @@ public partial class VLFSignal : IVLFSignal
         _startMarkers = new List<int>();
         _endMarkers = new List<int>();
         _blips = new List<BlipType>();
-        _vlfdata = new List<byte>();
+        _vlfData = new List<byte>();
     }
 
     private bool InternalParseWavFromFile(string inputWavFilePath)
@@ -374,24 +433,24 @@ public partial class VLFSignal : IVLFSignal
                             byteValue |= (1 << (7 - j));
                         }
                     }
-                    _vlfdata.Add((byte)byteValue);
+                    _vlfData.Add((byte)byteValue);
                     i += 8; // Move to next set of bits
                 }
             }
 
 
             var expectedDataCount = (_startMarkers.Count() / 10);
-            if (_vlfdata.Count == expectedDataCount)
+            if (_vlfData.Count == expectedDataCount)
             {
                 OnSignalParseCompleted?.Invoke(this, true);
                 return true;
             }
             else
             {
-                ConsolePrint($"Data decode Error! Expecting: {expectedDataCount} got {_vlfdata.Count}");
+                ConsolePrint($"Data decode Error! Expecting: {expectedDataCount} got {_vlfData.Count}");
                 OnSignalError?.Invoke(this,
                     new InvalidOperationException($"Data decode Error! Expecting: " +
-                    $"{expectedDataCount} got {_vlfdata.Count}"));
+                    $"{expectedDataCount} got {_vlfData.Count}"));
                 return false;
             }
         }
@@ -433,6 +492,69 @@ public partial class VLFSignal : IVLFSignal
         {
             return InternalParseWav(new WaveFileReader(wavMs));
         }
+    }
+
+    private bool InternalRenderWavVisualToStream(Stream outputStream)
+    {
+        if (outputStream == null || !outputStream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
+
+        if (_samples.Count == 0)
+        {
+            OnSignalError?.Invoke(this,
+                new InvalidOperationException("No samples available to render."));
+            return false;
+        }
+
+        using (var img = new Image<Rgba32>(imageWidth, imageHeight, Color.White))
+        {
+            float midY = imageHeight / 2f;
+            float sx = imageWidth / (float)_samples.Count;
+            float sy = imageHeight / 256f;
+
+            var pts = new PointF[_samples.Count];
+            for (int i = 0; i < _samples.Count; i++)
+                pts[i] = new PointF(i * sx, midY - _samples[i] * sy);
+
+            img.Mutate(ctx => ctx.DrawLine(Color.Blue, 1f, pts));
+
+            var font = Utilities.ResolveFont("Arial", 12);
+            var red = Pens.Solid(Color.Red, 1f);
+            var green = Pens.Solid(Color.Green, 1f);
+            var purple = Pens.Solid(Color.Purple, 1f);
+
+            for (int i = 0; i < _startMarkers.Count && i < _endMarkers.Count; i++)
+            {
+                float x1 = _startMarkers[i] * sx;
+                float x2 = _endMarkers[i] * sx;
+
+                img.Mutate(ctx =>
+                {
+                    ctx.DrawLine(red, new PointF(x1, 0), new PointF(x1, imageHeight));
+                    ctx.DrawLine(green, new PointF(x2, 0), new PointF(x2, imageHeight));
+                    ctx.DrawLine(purple, new PointF(x1, midY), new PointF(x2, midY));
+                });
+
+                int len = _endMarkers[i] - _startMarkers[i];
+                var type = DetermineBlipType(len);
+
+                if (type is BlipType.BINARY_ONE or BlipType.BINARY_ZERO)
+                {
+                    string digit = type == BlipType.BINARY_ONE ? "1" : "0";
+                    float tx = x1 + (x2 - x1) / 2 - 5;
+                    float ty = midY + 2;
+
+                    img.Mutate(ctx => ctx.DrawText(digit, font, Color.Black, new PointF(tx, ty)));
+                }
+            }
+
+            img.SaveAsPng(outputStream);
+            return true;
+        }
+
     }
 
     private void ConsolePrint(string message, params object[] args)
