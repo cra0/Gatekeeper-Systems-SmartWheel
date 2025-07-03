@@ -440,4 +440,66 @@ public partial class VLFSignal : IVLFSignal
         OnSignalConsolePrint?.Invoke(string.Format(message, args));
     }
 
+    /// <summary>
+    /// Saves the current VLFSignal's Data as a VLF WAV file to a provided stream.
+    /// </summary>
+    /// <param name="outputStream">The stream to write the WAV data to. Must be writable and seekable.</param>
+    /// <param name="sampleRate">Sample rate for the WAV file (default: 44100).</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    public bool ToWavStream(Stream outputStream, int sampleRate = 44100)
+    {
+        if (_buffer == null || _buffer.Length == 0)
+        {
+            OnSignalError?.Invoke(this, new InvalidOperationException("No data available to save as WAV."));
+            return false;
+        }
+        if (outputStream == null || !outputStream.CanWrite)
+        {
+            OnSignalError?.Invoke(this, new ArgumentException("Output stream is null or not writable."));
+            return false;
+        }
+        try
+        {
+            using (var wfw = new WaveFileWriter(outputStream, new WaveFormat(sampleRate, 8, 1)))
+            {
+                wfw.Write(_buffer, 0, _buffer.Length);
+            }
+            ConsolePrint("VLF signal written as WAV to provided stream.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Saves the current VLFSignal's Data as a VLF WAV file and returns the WAV as a byte array.
+    /// </summary>
+    /// <param name="sampleRate">Sample rate for the WAV file (default: 44100).</param>
+    /// <returns>WAV file as byte array, or null if failed.</returns>
+    public byte[]? ToWavBytes(int sampleRate = 44100)
+    {
+        if (_buffer == null || _buffer.Length == 0)
+        {
+            OnSignalError?.Invoke(this, new InvalidOperationException("No data available to save as WAV."));
+            return null;
+        }
+        try
+        {
+            using (var ms = new MemoryStream())
+            {
+                if (!ToWavStream(ms, sampleRate))
+                    return null;
+                ConsolePrint("VLF signal exported as WAV byte array.");
+                return ms.ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            OnSignalError?.Invoke(this, ex);
+            return null;
+        }
+    }
 }
