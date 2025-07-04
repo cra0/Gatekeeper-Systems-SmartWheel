@@ -24,7 +24,7 @@ Unlock Code: 01110001 (Hexadecimal: 0x71)
 You can find a reference to this in the firmware:
 ![8051_fw_lockunlock](docs/images/8051_fw_lockunlock.png)
 
-Through some brute-forcing (which I will speak about in my [blog](https://cra0.net)) I have also discovered an alternative lock and unlock which is used by stores such as [TJ Maxx](https://tjmaxx.tjx.com/).
+Through some brute-forcing (which I will speak about in my [blog](https://cra0.net)) I have also discovered an alternative lock and unlock which is used by stores such as [TJ Maxx](https://tjmaxx.tjx.com/). This lock seems to be tied to the [Purchek](https://www.gatekeepersystems.com/solutions/purchek/) system as it triggers the smart wheel to send out a packet to activate an alarm and start the surveillance DVR to record for a brief moment.
 
 ```
 Lock2 Code: 11000111 (Hexadecimal: 0xC7)
@@ -37,7 +37,7 @@ Older Gatekeeper System wheels also have their own lock signal that isn't in the
 
 ### Device Information Query
 
-Through the usage of one of the Key tools I also discovered this specific 8khz signal that is sent to the smart wheel.
+Through the usage of one of the 'smart key' tools I also discovered this specific 8khz signal that is sent to the smart wheel.
 
 ![signal2](docs/images/query_device_signal.png)
 
@@ -48,13 +48,12 @@ Once the wheel receives this it will then return back statistical information in
 
 - Battery voltage e.g. (3.0v)
 - Cycle Count (How many times it was locked/unlocked)
-- date e.g. (09.19) (Manufactory date perhaps?)
-- rL e.g. (7.10)
+- date e.g. (09.19) (Manufactory date or 'BornDate')
+- rL e.g. (7.10) (Firmware Version)
 - id1 e.g. (0921)
 - id2 e.g. (2358)
 
-
-This data can also be sent from the wheel via the 2.4GHz signal.
+This data can also be sent from the wheel via the 2.4GHz radio.
 
 ### Permission Signal
 
@@ -72,7 +71,62 @@ So far the ones I've discovered through the brute force of the DIP switch are:
 
 These give the smart wheel permission not to lock if it was to encounter a lock command such as 0x8E (Lock1) or 0xC7 (Lock2).
 
-You can find [tools](tools/README.md) I've developed here that deal with these in more detail.
+You can find [tools](tools/README.md) I've developed here that deal with these VLF signals in more detail.
+
+## All 8KHz Codes
+
+Below are the complete list of 8 kHz signal codes I’ve discovered so far. A condensed subset of these appears on the label on the back of the **Smart Key 2**.
+
+| Code | Description                     |
+|------|---------------------------------|
+| 0    | Idle                            |
+| 2    | E-purchek Door Lock             |
+| 3    | Lock                            |
+| 4    | Indoor Unlock                   |
+| 5    | Indoor Lock                     |
+| 6    | Unlock                          |
+| 9    | 30 Second Permission            |
+| 10   | 10 Minute Permission            |
+| 11   | 30 Minute Permission            |
+| 12   | 1 Hour Permission               |
+| 13   | 3 Hour Permission               |
+| 14   | 12 Hour Permission              |
+| 15   | 2 Minute Permission             |
+| 16   | 5 Minute Permission             |
+| 17   | 1 Minute Permission             |
+| 18   | Restore Permission              |
+| 19   | CARTTRONICS Lock                |
+| 20   | CARTTRONICS UNLock              |
+| 21   | E-purchek Surveillance          |
+| 22   | S-purchek Surveillance          |
+| 23   | S-purchek Door Lock             |
+| 24   | Clear Permissions               |
+| 25   | E-purchek Arm 1                 |
+| 26   | E-purchek Disarm 1              |
+| 27   | S-purchek Alt Door Lock         |
+| 28   | E-purchek Disarm 2              |
+| 29   | E-purchek Arm 2                 |
+| 82   | Athena Logging Door 0           |
+| 84   | Athena Logging Door 1           |
+| 83   | Athena Locking Door 0           |
+| 86   | Athena Logging Door 2           |
+| 87   | Athena Locking Door 2           |
+| 85   | Athena Locking Door 1           |
+| 88   | Athena Logging Door 3           |
+| 89   | Athena Locking Door 3           |
+| 90   | Athena Kill Nav                 |
+| 91   | Athena Future Use               |
+| 92   | S-purchek Surveillance A        |
+| 93   | S-purchek Door Lock A           |
+| 94   | S-purchek Surveillance B        |
+| 95   | S-purchek Door Lock B           |
+| 96   | S-purchek Surveillance C        |
+| 97   | S-purchek Door Lock C           |
+| 98   | S-purchek Surveillance D        |
+| 99   | S-purchek Door Lock D           |
+| 52   | Dwell SCO Entry – 30 Sec        |
+| 53   | Dwell SCO Entry – 1 Min         |
+| 30   | Dwell SCO Exit                  |
 
 ## (2.4GHz Operation)
 
@@ -124,7 +178,34 @@ These are yet to be explored further but there are transceivers that I have conf
 
 ![door-manager](docs/images/door-manager.png)
 
-The Door Manager is the hardware that manages GKS wheels which are retailed in a store/location. It can provide 2.4ghz and 8khz functionality.
+The Door Manager is the hardware that manages GKS wheels which are retailed in a store/location. It can provide 2.4 GHz and 8 kHz functionality and basically acts like a controller to manage activity through a passageway or area in the store.
+
+It consists of two 8 kHz loop connectors that can be configured from the default (permission/lock) to support many different functions.
+
+The Door Manager can log events such as Purchek alarms and surveillance events. When an event occurs, it records:
+
+- Time-Stamp
+- DeviceId
+- St (Status: LK/UNL)
+- Cycs (Cycle count)
+- BornDate (Manufacture date)
+- Cst
+- STH
+- Bat (Battery Level eg. 3.0v)
+- FrmwV (Firmware Version)
+- Hw (eg FE)
+- Btl
+- WDR
+- PairedID
+- FL
+- DvS
+- 20S
+- Chn
+- AS
+- Ant
+- TSLP
+
+
 
 ## SOC (MCU)
 
