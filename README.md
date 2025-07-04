@@ -124,10 +124,7 @@ These are yet to be explored further but there are transceivers that I have conf
 
 ![door-manager](docs/images/door-manager.png)
 
-The Door Manager is the hardware that manages GKS wheels which are retailed in a store/location.
-
-It also logs events.
-
+The Door Manager is the hardware that manages GKS wheels which are retailed in a store/location. It can provide 2.4ghz and 8khz functionality.
 
 ## SOC (MCU)
 
