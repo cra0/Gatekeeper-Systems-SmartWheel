@@ -120,6 +120,12 @@ At 2.4GHz we also have the ability to send some permission commands to the smart
 These are yet to be explored further but there are transceivers that I have confirmed GateKeeper Systems have in place that talk to the Smart Wheel as evident by this screenshot in this manual:
 ![signal2](docs/images/purchek-door-manager-manual.png)
 
+## Door Manager
+
+![door-manager](docs/images/door-manager.png)
+
+The Door Manager is the hardware that manages GKS wheels which are retailed in a store/location. It can provide 2.4ghz and 8khz functionality.
+
 ## SOC (MCU)
 
 ### ATMEL MEGA
