@@ -26,19 +26,22 @@ namespace VLFSignalTool
                 //Console.WriteLine("Done.");
                 // Console.ReadKey();
                 //Console.WriteLine("Loading ToneDetector..");
-                var detector = new ToneDetector(false, "sample_gtp4.wav");
+                var detector = new ToneDetector(false, "sample_gtp6.wav");
                 var decoder = new ToneDecoder();
                 detector.DetectionResult += c =>
                 {
                     //Console.WriteLine($"Detected: {c}");
                 };
-                detector.DebugMessage += msg =>
+                detector.DetectionEventMessage += msg =>
                 {
                     //Console.WriteLine($"Debug: {msg}");
                 };
 
                 detector.DetectionResult += decoder.FeedBit;
-                decoder.OnByteDecoded += b => Console.Write($"0x{b:X2} ");
+                decoder.OnByteDecoded += b =>
+                {
+                    Console.WriteLine($"0x{b:X2}");
+                };
 
                 detector.Start();
 

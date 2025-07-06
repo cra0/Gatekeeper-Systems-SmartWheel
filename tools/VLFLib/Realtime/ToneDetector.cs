@@ -23,11 +23,8 @@ public sealed class ToneDetector : IDisposable
     private int _runLen = 0;     // current 1-run length
     private bool _inToneRun = false; // are we inside a 1-run?
 
-
-
-
     public event Action<char>? DetectionResult;
-    public event Action<string>? DebugMessage;
+    public event Action<string>? DetectionEventMessage;
 
     public ToneDetector(bool liveInput, string? wavFile = null)
     {
@@ -76,7 +73,7 @@ public sealed class ToneDetector : IDisposable
     {
         double power = _go.ProcessFrame(frame);
         bool isTone = power > POWER_THRESH;
-        DebugMessage?.Invoke($"Power: {power:F3}, IsTone: {isTone}");
+        DetectionEventMessage?.Invoke($"Power: {power:F3}, IsTone: {isTone}");
 
         // ---------- run-length tracker ----------
         if (isTone)
@@ -84,7 +81,7 @@ public sealed class ToneDetector : IDisposable
             // inside / continuing a 1-run
             _runLen++;
             _inToneRun = true;
-            DetectionResult?.Invoke('1');   // still stream the 1/0 for logging
+            DetectionResult?.Invoke('1');
         }
         else
         {
@@ -93,12 +90,12 @@ public sealed class ToneDetector : IDisposable
 
             if (_inToneRun)
             {
+                DetectionEventMessage?.Invoke($"Tone run ended: {_runLen} frames");
                 _runLen = 0;
                 _inToneRun = false;
             }
         }
     }
-
 
     public void Dispose() 
     {
