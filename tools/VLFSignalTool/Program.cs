@@ -1,21 +1,55 @@
-﻿using VLFLib;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using System.Text;
+using VLFLib;
+using VLFLib.Realtime;
 
 namespace VLFSignalTool
 {
     internal class Program
     {
+
         static int Main(string[] args)
         {
-            if (args.Length < 2 || args.Length > 3)
+            if (args.Length > 3)
             {
                 PrintUsage();
                 return 1;
             }
 
             string mode = args[0].ToLowerInvariant();
-            string inputPath = args[1];
-            string? optPath = args.Length == 3 ? args[2] : null;
+            string inputPath = string.Empty;
 
+            if (mode == "-realtime")
+            {
+                // QuickSampleDump.RecordWav(outFile: "sample.wav");
+                //Console.WriteLine("Done.");
+                // Console.ReadKey();
+                //Console.WriteLine("Loading ToneDetector..");
+                var detector = new ToneDetector(false, "sample_gtp4.wav");
+                var decoder = new ToneDecoder();
+                detector.DetectionResult += c =>
+                {
+                    //Console.WriteLine($"Detected: {c}");
+                };
+                detector.DebugMessage += msg =>
+                {
+                    //Console.WriteLine($"Debug: {msg}");
+                };
+
+                detector.DetectionResult += decoder.FeedBit;
+                decoder.OnByteDecoded += b => Console.Write($"0x{b:X2} ");
+
+                detector.Start();
+
+                Console.WriteLine("Done. Exit the program.");
+                Console.ReadKey();
+               
+                return 1;
+            }
+
+            inputPath = args[1];
+            string? optPath = args.Length == 3 ? args[2] : null;
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"Error: File not found: {inputPath}");
