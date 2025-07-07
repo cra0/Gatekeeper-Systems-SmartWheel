@@ -75,58 +75,58 @@ You can find [tools](tools/README.md) I've developed here that deal with these V
 
 ## All 8KHz Codes
 
-Below are the complete list of 8 kHz signal codes I’ve discovered so far. A condensed subset of these appears on the label on the back of the **Smart Key 2**.
+Below are the complete list of 8 kHz signal codes I’ve discovered so far. A condensed subset of these appears on the label on the back of the **Smart Key 2**. This table also shows you the 8Khz packet values discovered.
 
-| Code | Description                     |
-|------|---------------------------------|
-| 0    | Idle                            |
-| 2    | E-purchek Door Lock             |
-| 3    | Lock                            |
-| 4    | Indoor Unlock                   |
-| 5    | Indoor Lock                     |
-| 6    | Unlock                          |
-| 9    | 30 Second Permission            |
-| 10   | 10 Minute Permission            |
-| 11   | 30 Minute Permission            |
-| 12   | 1 Hour Permission               |
-| 13   | 3 Hour Permission               |
-| 14   | 12 Hour Permission              |
-| 15   | 2 Minute Permission             |
-| 16   | 5 Minute Permission             |
-| 17   | 1 Minute Permission             |
-| 18   | Restore Permission              |
-| 19   | CARTTRONICS Lock                |
-| 20   | CARTTRONICS UNLock              |
-| 21   | E-purchek Surveillance          |
-| 22   | S-purchek Surveillance          |
-| 23   | S-purchek Door Lock             |
-| 24   | Clear Permissions               |
-| 25   | E-purchek Arm 1                 |
-| 26   | E-purchek Disarm 1              |
-| 27   | S-purchek Alt Door Lock         |
-| 28   | E-purchek Disarm 2              |
-| 29   | E-purchek Arm 2                 |
-| 82   | Athena Logging Door 0           |
-| 84   | Athena Logging Door 1           |
-| 83   | Athena Locking Door 0           |
-| 86   | Athena Logging Door 2           |
-| 87   | Athena Locking Door 2           |
-| 85   | Athena Locking Door 1           |
-| 88   | Athena Logging Door 3           |
-| 89   | Athena Locking Door 3           |
-| 90   | Athena Kill Nav                 |
-| 91   | Athena Future Use               |
-| 92   | S-purchek Surveillance A        |
-| 93   | S-purchek Door Lock A           |
-| 94   | S-purchek Surveillance B        |
-| 95   | S-purchek Door Lock B           |
-| 96   | S-purchek Surveillance C        |
-| 97   | S-purchek Door Lock C           |
-| 98   | S-purchek Surveillance D        |
-| 99   | S-purchek Door Lock D           |
-| 52   | Dwell SCO Entry – 30 Sec        |
-| 53   | Dwell SCO Entry – 1 Min         |
-| 30   | Dwell SCO Exit                  |
+| Code | Description                  | 8KHZ Code |
+|------|------------------------------|-----------|
+| 0    | Idle                         | N/A       |
+| 2    | E-purchek Door Lock          | 0xA5      |
+| 3    | Lock                         | 0x8E      |
+| 4    | Indoor Unlock                | 0x78      |
+| 5    | Indoor Lock                  | 0x85      |
+| 6    | Unlock                       | 0x71      |
+| 9    | 30 Second Permission         | 0x56      |
+| 10   | 10 Minute Permission         | 0x50      |
+| 11   | 30 Minute Permission         | 0x4F      |
+| 12   | 1 Hour Permission            | 0x4A      |
+| 13   | 3 Hour Permission            | 0x45      |
+| 14   | 12 Hour Permission           | 0x40      |
+| 15   | 2 Minute Permission          | 0x3A      |
+| 16   | 5 Minute Permission          | 0x36      |
+| 17   | 1 Minute Permission          | 0x34      |
+| 18   | Restore Permission           | 0x1A      |
+| 19   | CARTTRONICS Lock             | N/A       |
+| 20   | CARTTRONICS UNLock           | N/A       |
+| 21   | E-purchek Surveillance       | 0xC4      |
+| 22   | S-purchek Surveillance       | 0xB3      |
+| 23   | S-purchek Door Lock          | 0x55      |
+| 24   | Clear Permissions            | 0x9A      |
+| 25   | E-purchek Arm 1              | 0xA8      |
+| 26   | E-purchek Disarm 1           | 0xC9      |
+| 27   | S-purchek Alt Door Lock      | 0xC7      |
+| 28   | E-purchek Disarm 2           | 0xBD      |
+| 29   | E-purchek Arm 2              | 0xA6      |
+| 82   | Athena Logging Door 0        | 0x20      |
+| 83   | Athena Locking Door 0        | 0x99      |
+| 84   | Athena Logging Door 1        | 0x43      |
+| 85   | Athena Locking Door 1        | 0x2F      |
+| 86   | Athena Logging Door 2        | 0xB0      |
+| 87   | Athena Locking Door 2        | 0xBE      |
+| 88   | Athena Logging Door 3        | 0x67      |
+| 89   | Athena Locking Door 3        | 0x6C      |
+| 90   | Athena Kill Nav              | 0xDC      |
+| 91   | Athena Future Use            | 0x02      |
+| 92   | S-purchek Surveillance A     | 0x7D      |
+| 93   | S-purchek Door Lock A        | 0x62      |
+| 94   | S-purchek Surveillance B     | 0x96      |
+| 95   | S-purchek Door Lock B        | 0x29      |
+| 96   | S-purchek Surveillance C     | 0x8B      |
+| 97   | S-purchek Door Lock C        | 0x1F      |
+| 98   | S-purchek Surveillance D     | 0x82      |
+| 99   | S-purchek Door Lock D        | 0x1C      |
+| 52   | Dwell SCO Entry – 30 Sec     | 0x7E      |
+| 53   | Dwell SCO Entry – 1 Min      | 0x7B      |
+| 30   | Dwell SCO Exit               | 0x23      |
 
 ## (2.4GHz Operation)
 
