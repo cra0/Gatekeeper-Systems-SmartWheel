@@ -23,6 +23,7 @@
     <Deterministic>true</Deterministic>
 
     <Version>0.0.0</Version>
+    <SemVerLevel>2.0.0</SemVerLevel>
   </PropertyGroup>
 
   <ItemGroup>
