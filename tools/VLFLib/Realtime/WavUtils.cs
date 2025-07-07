@@ -6,6 +6,14 @@ namespace VLFLib.Realtime;
 
 public static class WavUtils
 {
+    public static IReadOnlyList<MMDevice> ListInputDevices()
+    {
+        var e = new MMDeviceEnumerator();
+        return e.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active)
+                .OrderBy(d => d.FriendlyName)
+                .ToList()
+                .AsReadOnly();
+    }
 
     public static void RecordWav(string outFile, int seconds = 5, int? deviceIndex = null)
     {

@@ -22,22 +22,26 @@ namespace VLFSignalTool
 
             if (mode == "-realtime")
             {
+                var decoder = new ToneDecoder();
+                decoder.OnByteDecoded += b =>
+                {
+                    TimeSpan ts = TimeSpan.FromMilliseconds(Environment.TickCount);
+                    Console.WriteLine($"[{ts:mm\\:ss\\.fff}] Decoded byte: 0x{b:X2}");
+                };
+#if tst
                 // QuickSampleDump.RecordWav(outFile: "sample.wav");
                 //Console.WriteLine("Done.");
                 // Console.ReadKey();
                 //Console.WriteLine("Loading ToneDetector..");
                 var detector = new ToneDetector(false, "sample_gtp6.wav");
                 var decoder = new ToneDecoder();
-                detector.DetectionResult += c =>
-                {
-                    //Console.WriteLine($"Detected: {c}");
-                };
-                detector.DetectionEventMessage += msg =>
+
+                detector.OnDetectionEventMessage += msg =>
                 {
                     //Console.WriteLine($"Debug: {msg}");
                 };
 
-                detector.DetectionResult += decoder.FeedBit;
+                detector.OnBit += decoder.FeedBit;
                 decoder.OnByteDecoded += b =>
                 {
                     Console.WriteLine($"0x{b:X2}");
@@ -45,9 +49,46 @@ namespace VLFSignalTool
 
                 detector.Start();
 
-                Console.WriteLine("Done. Exit the program.");
+                Console.WriteLine("Done. Moving on.");
                 Console.ReadKey();
-               
+
+                detector.Stop();
+
+#endif
+
+                var devices = WavUtils.ListInputDevices();
+                for (int i = 0; i < devices.Count; i++)
+                {
+                    Console.WriteLine($"{i}: {devices[i].FriendlyName}");
+                }
+
+                Console.WriteLine("Select a device index to start real-time detection (or -1 for default):");
+                int deviceIndex;
+                while (true)
+                {
+                    if (int.TryParse(Console.ReadLine(), out deviceIndex) && 
+                        (deviceIndex == -1 || (deviceIndex >= 0 && deviceIndex < devices.Count)))
+                    {
+                        break;
+                    }
+                    Console.WriteLine("Invalid input. Please enter a valid device index.");
+                }
+                Console.WriteLine($"Selected device: {devices[deviceIndex].FriendlyName}");
+
+
+                var detector2 = new ToneDetector(liveInput: true, device: devices[deviceIndex]);
+                detector2.OnBit += decoder.FeedBit;
+                detector2.OnDetectionEventMessage += msg =>
+                {
+                    //Console.WriteLine($"{msg}");
+                };
+
+                detector2.Start();
+                Console.WriteLine("Real-time detection started. Press any key to stop...");
+                Console.ReadKey();
+                detector2.Stop();
+                Console.WriteLine("Real-time detection stopped.");
+             
                 return 1;
             }
 
