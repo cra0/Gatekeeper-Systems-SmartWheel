@@ -119,6 +119,25 @@ public partial class VLFSignal
         return BytesToVLFSignalWavBytes(dataSequence, 44100, 0.8f, 0.555f);
     }
 
+    public static void ByteSequenceToVLFWavFileMemoryStream(byte[] wavSignalBytes, int sampleRate, float amplitude, float silenceLength, MemoryStream memoryStream)
+    {
+        if (wavSignalBytes == null || wavSignalBytes.Length == 0)
+        {
+            throw new ArgumentException("Input data sequence array cannot be null or empty.");
+        }
+
+        if (memoryStream == null)
+        {
+            throw new ArgumentNullException(nameof(memoryStream), "Memory stream cannot be null.");
+        }
+
+        using (WaveFileWriter writer = new WaveFileWriter(memoryStream, new WaveFormat(sampleRate, 8, 1)))
+        {
+            byte[] waveformBytes = BytesToVLFSignalWavBytes(wavSignalBytes, sampleRate, amplitude, silenceLength);
+            writer.Write(waveformBytes, 0, waveformBytes.Length);
+        }
+    }
+
     public static void SaveVLFWavFile(byte[] dataSequence, int sampleRate, float amplitude, float silenceLength, string filePath)
     {
         if (dataSequence == null || dataSequence.Length == 0)
@@ -136,6 +155,5 @@ public partial class VLFSignal
             byte[] waveformBytes = BytesToVLFSignalWavBytes(dataSequence, sampleRate, amplitude, silenceLength);
             writer.Write(waveformBytes, 0, waveformBytes.Length);
         }
-        return;
     }
 }
