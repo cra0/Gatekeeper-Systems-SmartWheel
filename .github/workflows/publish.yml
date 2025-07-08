@@ -27,7 +27,10 @@ jobs:
       id: ver
       run: |
         DATE=$(date -u +'%Y%m%d')
-        echo "VERSION=${BASE_VERSION}.${DATE}" >> "$GITHUB_ENV"
+        RUN=${{ github.run_number }}
+        # zero-pad run to 3 digits so sorting still works
+        PATCH="${DATE}$(printf '%03d' \"$RUN\")"
+        echo "VERSION=${BASE_VERSION}.${PATCH}" >> "$GITHUB_ENV"
 
     # --------- restore, build, pack -----------------------------------
     - name: Restore
