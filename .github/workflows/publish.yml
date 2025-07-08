@@ -27,7 +27,8 @@ jobs:
     - name: Compute version
       id: ver
       run: |
-        DATE=$(date -u +'%Y%m%d')
+        # 2-digit year + month + day (6 digits, e.g. 250708)
+        DATE=$(date -u +'%y%m%d')
         RUN=${{ github.run_number }}
         # zero-pad run to 3 digits so sorting still works
         PATCH="${DATE}$(printf '%03d' \"$RUN\")"
