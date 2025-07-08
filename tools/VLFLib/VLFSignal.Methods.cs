@@ -60,34 +60,28 @@ public partial class VLFSignal
         }
     }
 
-    internal static void EncodeByteToWaveform(byte data, List<byte> waveform, int sampleRate, float amplitude)
+    internal static void EncodeByteToWaveform(
+        byte data, 
+        List<byte> waveform, 
+        int sampleRate, 
+        float amplitude,
+        float interBitSilence = 0.004f,
+        float endMarkerSilence = 0.004f)
     {
-        // Generate the start marker
+        // Start marker
         AddSignal(waveform, sampleRate, 0.021f, amplitude, frequency: 7000, fadeIn: true, fadeOut: true);
         AddSilence(waveform, sampleRate, 0.0035f);
 
         for (int i = 7; i >= 0; i--)
         {
             bool bit = (data & (1 << i)) != 0;
-
-            if (bit)
-            {
-                // Generate 1
-                AddSignal(waveform, sampleRate, 0.008f, amplitude, frequency: 7000, fadeIn: true, fadeOut: true);
-            }
-            else
-            {
-                // Generate 0
-                AddSignal(waveform, sampleRate, 0.004f, amplitude, frequency: 7000, fadeIn: true, fadeOut: true);
-            }
-
-            // Add silence between bits
-            AddSilence(waveform, sampleRate, 0.004f);
+            AddSignal(waveform, sampleRate, bit ? 0.008f : 0.004f, amplitude, frequency: 7000, fadeIn: true, fadeOut: true);
+            AddSilence(waveform, sampleRate, interBitSilence);
         }
 
-        // Generate the end marker
+        // End marker
         AddSignal(waveform, sampleRate, 0.016f, amplitude, frequency: 7000, fadeIn: true, fadeOut: true);
-        AddSilence(waveform, sampleRate, 0.004f);
+        AddSilence(waveform, sampleRate, endMarkerSilence);
     }
 
     public static byte[] BytesToVLFSignalWavBytes(byte[] dataSequence, int sampleRate, float amplitude, float silenceLength)
@@ -119,7 +113,8 @@ public partial class VLFSignal
         return BytesToVLFSignalWavBytes(dataSequence, 44100, 0.8f, 0.555f);
     }
 
-    public static void ByteSequenceToVLFWavFileMemoryStream(byte[] wavSignalBytes, int sampleRate, float amplitude, float silenceLength, MemoryStream memoryStream)
+    public static void ByteSeqenceToVLFWavFileMemoryStream(byte[] wavSignalBytes, int sampleRate, float amplitude, float spaceLength, 
+                                                            MemoryStream memoryStream)
     {
         if (wavSignalBytes == null || wavSignalBytes.Length == 0)
         {
@@ -133,7 +128,18 @@ public partial class VLFSignal
 
         using (WaveFileWriter writer = new WaveFileWriter(memoryStream, new WaveFormat(sampleRate, 8, 1)))
         {
-            byte[] waveformBytes = BytesToVLFSignalWavBytes(wavSignalBytes, sampleRate, amplitude, silenceLength);
+            List<byte> waveform = new List<byte>();
+
+            // Add initial silence
+            AddSilence(waveform, sampleRate, spaceLength);
+
+            //Encode each byte into waveform
+            foreach (byte data in wavSignalBytes)
+            {
+                EncodeByteToWaveform(data, waveform, sampleRate, amplitude, endMarkerSilence: spaceLength);
+            }
+
+            byte[] waveformBytes = waveform.ToArray();
             writer.Write(waveformBytes, 0, waveformBytes.Length);
         }
     }
