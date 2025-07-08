@@ -131,7 +131,7 @@ public partial class VLFSignal
             List<byte> waveform = new List<byte>();
 
             // Add initial silence
-            AddSilence(waveform, sampleRate, 0.555f);
+            AddSilence(waveform, sampleRate, spaceLength);
 
             //Encode each byte into waveform
             foreach (byte data in wavSignalBytes)
